@@ -1,24 +1,44 @@
 package model
 
 import akka.actor.Props
-import akka.persistence.PersistentActor
+import akka.persistence.{PersistentActor, RecoveryCompleted, SnapshotOffer}
+import model.PrinterActor.{Kill, PrintState, Snapshot, UpdateState}
 
-class PrinterActor(printer: Printer) extends PersistentActor {
+class PrinterActor(var printer: Printer) extends PersistentActor {
 
-  println(persistenceId + " created")
+  self ! PrintState
 
   override def receiveRecover: Receive = {
-    case _ => println("te")
+    case RecoveryCompleted => println("recovery completed")
+    case printer: String => updatePrinter(printer)
+    case SnapshotOffer(_, snapshot: Printer) => printer = snapshot
   }
 
   override def receiveCommand: Receive = {
-    case _ => println("tete")
+    case UpdateState(p) => persist(p)(updatePrinter)
+    case PrintState => println(printer.displayName)
+    case Snapshot => saveSnapshot(printer)
+    case Kill => println("Killing: " + persistenceId); context.stop(self)
   }
 
   override def persistenceId: String = printer.id
+
+  def updatePrinter(displayName: String): Unit = {
+    printer = printer.copy(displayName = Some(displayName))
+    self ! PrintState
+  }
 }
 
 object PrinterActor {
+
+  case object Snapshot
+
+  case object PrintState
+
+  case class UpdateState(displayName: String)
+
+  case object Kill
+
 
   def props(printer: Printer): Props = {
     Props(classOf[PrinterActor], printer)

@@ -10,12 +10,12 @@ trait ActorContainers {
   implicit def actorRefFactory: ActorRefFactory
 
   val syncWorker: ActorRef
-  val printerSpawner: ActorRef
+  val printerContainer: ActorRef
 }
 
 trait DefaultActorContainers extends ActorContainers{
   this: Actor =>
 
-  override val printerSpawner: ActorRef = context.actorOf(PrinterContainer.props())
-  override val syncWorker: ActorRef = context.actorOf(SyncWorker.props(printerSpawner))
+  override val printerContainer: ActorRef = context.actorOf(PrinterContainer.props())
+  override val syncWorker: ActorRef = context.actorOf(SyncWorker.props(printerContainer))
 }

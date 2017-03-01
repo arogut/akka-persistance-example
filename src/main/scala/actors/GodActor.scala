@@ -1,5 +1,7 @@
 package actors
 
+import actors.GodActor.{GeneratePrinters, KillPrinters, UpdatePrinters}
+import actors.PrinterContainer.{KillPrinterActor, UpdatePrinterActors}
 import akka.actor.{Actor, ActorRefFactory}
 import service.SyncWorker.SyncPrinters
 import akka.pattern.ask
@@ -15,6 +17,17 @@ class GodActor extends Actor with DefaultActorContainers {
   implicit val timeout = Timeout(5 seconds)
 
   override def receive: Receive = {
-    case _ => syncWorker ? SyncPrinters
+    case GeneratePrinters => syncWorker ? SyncPrinters
+    case KillPrinters => printerContainer ? KillPrinterActor
+    case UpdatePrinters => printerContainer ? UpdatePrinterActors
   }
+}
+
+object GodActor {
+
+  case object GeneratePrinters
+
+  case object KillPrinters
+
+  case object UpdatePrinters
 }
