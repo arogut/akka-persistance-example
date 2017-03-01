@@ -1,6 +1,7 @@
 import actors.GodActor
 import akka.actor.{ActorSystem, Props}
 import akka.util.Timeout
+import akka.pattern.ask
 
 import scala.concurrent.duration._
 
@@ -13,6 +14,5 @@ object Boot extends App {
   implicit def actorRefFactory = system
   implicit val log = system.log
 
-
-
+  service ? ""
 }
